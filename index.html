@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StrayCare India — Rescue & Adoption Dashboard</title>
+  <meta name="description" content="A responsive dashboard website for a stray dog rescue in India. Includes adoption listings, rescue stats, report form, volunteer/donate, and more." />
+
+  <!-- Icons -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23ff7043' d='M32 6C16.5 6 4 18.5 4 34s12.5 28 28 28 28-12.5 28-28S47.5 6 32 6z'/%3E%3Cpath fill='%23fff' d='M21 27a5 5 0 1 1 10 0 5 5 0 0 1-10 0zm12-6a5 5 0 1 1 10 0 5 5 0 0 1-10 0zM17 39c0-5 6-8 15-8s15 3 15 8-6 11-15 11S17 44 17 39z'/%3E%3C/svg%3E" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121830;
+      --panel-2: #0f142a;
+      --text: #e8ecf3;
+      --muted: #b8c1d9;
+      --brand: #22c55e; /* emerald-500 */
+      --brand-2: #16a34a;
+      --accent: #38bdf8; /* sky-400 */
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --ok: #10b981;
+      --ring: rgba(56,189,248,.35);
+      --shadow: 0 10px 30px rgba(0,0,0,.35), 0 1px 0 rgba(255,255,255,.04) inset;
+      --radius: 18px;
+    }
+    [data-theme="light"]{
+      --bg: #f7fafc;
+      --panel: #ffffff;
+      --panel-2: #f1f5f9;
+      --text: #0b1020;
+      --muted: #475569;
+      --brand: #059669;
+      --brand-2: #047857;
+      --accent: #0284c7;
+      --ring: rgba(2,132,199,.35);
+      --shadow: 0 10px 30px rgba(2, 6, 23, .08);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1000px 600px at 10% 0%, rgba(56,189,248,.12), transparent 70%),
+                  radial-gradient(800px 500px at 90% 20%, rgba(34,197,94,.12), transparent 70%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Layout */
+    .container { width: min(1200px, 93vw); margin-inline: auto; }
+
+    header.nav {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: saturate(140%) blur(10px);
+      background: color-mix(in oklab, var(--panel) 70%, transparent);
+      border-bottom: 1px solid color-mix(in oklab, var(--text) 10%, transparent);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 6px; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .2px; }
+    .brand .logo { width: 34px; height: 34px; border-radius: 12px; background:
+      radial-gradient(16px 12px at 65% 35%, #fff8, transparent),
+      radial-gradient(24px 22px at 40% 30%, var(--accent), transparent),
+      linear-gradient(135deg, #ff7a59, #ffb86c);
+      box-shadow: var(--shadow);
+    }
+    .nav-links { display: flex; gap: 14px; flex-wrap: wrap; }
+    .nav-links a { padding: 10px 12px; border-radius: 999px; color: var(--text); font-weight: 600; opacity: .9; }
+    .nav-links a:hover { background: color-mix(in oklab, var(--text) 9%, transparent); text-decoration: none; }
+
+    .actions { display: flex; gap: 8px; align-items: center; }
+    .btn { border: 0; border-radius: 999px; padding: 10px 14px; font-weight: 700; cursor: pointer; color: #0b1020; background: var(--brand); box-shadow: var(--shadow); }
+    .btn:hover { background: var(--brand-2); }
+    .btn.secondary { background: var(--panel-2); color: var(--text); border: 1px solid color-mix(in oklab, var(--text) 10%, transparent); }
+    .btn.secondary:hover { background: color-mix(in oklab, var(--panel-2) 70%, var(--text) 5%); }
+
+    /* Hero */
+    .hero { padding: 56px 0 28px; }
+    .hero-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 26px; align-items: center; }
+    .card { background: linear-gradient(180deg, color-mix(in oklab, var(--panel) 94%, transparent), color-mix(in oklab, var(--panel-2) 90%, transparent)); border: 1px solid color-mix(in oklab, var(--text) 12%, transparent); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .pad-lg { padding: 28px; }
+    .title { font-size: clamp(28px, 4.2vw, 44px); line-height: 1.08; margin: 0 0 10px; font-weight: 900; letter-spacing: -0.5px; }
+    .subtitle { font-size: clamp(14px, 1.6vw, 18px); color: var(--muted); margin: 0 0 18px; }
+
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 18px; }
+    .kpi { padding: 16px; border-radius: 14px; background: color-mix(in oklab, var(--panel) 80%, transparent); border: 1px solid color-mix(in oklab, var(--text) 10%, transparent); }
+    .kpi .num { font-size: 26px; font-weight: 800; }
+    .kpi .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .8px; }
+
+    .hero-art { position: relative; min-height: 300px; border-radius: var(--radius); overflow: hidden; display: grid; place-items: center; }
+    .paws { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px); background-size: 16px 16px; }
+    .doggo {
+      width: 80%; aspect-ratio: 1.4/1; border-radius: 20px; background:
+        radial-gradient(160px 120px at 65% 30%, rgba(255,255,255,.1), transparent),
+        linear-gradient(135deg, rgba(56,189,248,.35), rgba(34,197,94,.35)),
+        url('https://images.unsplash.com/photo-1558944351-c0ff7c845e43?q=80&w=1200&auto=format&fit=crop');
+      background-size: cover; background-position: center; box-shadow: var(--shadow);
+      border: 1px solid color-mix(in oklab, var(--text) 12%, transparent);
+      filter: saturate(1.05) contrast(1.05);
+      position: relative;
+    }
+    .badge { position: absolute; top: 14px; left: 14px; background: var(--accent); color: #06121b; padding: 6px 10px; border-radius: 999px; font-weight: 800; box-shadow: var(--shadow); font-size: 12px; letter-spacing: .5px; }
+
+    /* Sections */
+    section { padding: 36px 0; }
+    .section-title { font-size: 24px; font-weight: 800; margin: 0 0 14px; }
+
+    /* Adoption grid */
+    .grid { display: grid; gap: 16px; }
+    .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 900px){ .hero-grid { grid-template-columns: 1fr; } .grid.cols-3 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px){ .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; } .kpis { grid-template-columns: repeat(2, 1fr); } }
+
+    .pet-card { display: grid; grid-template-rows: 180px auto; overflow: hidden; border-radius: 16px; border: 1px solid color-mix(in oklab, var(--text) 10%, transparent); background: var(--panel); box-shadow: var(--shadow); }
+    .pet-card img { width: 100%; height: 100%; object-fit: cover; }
+    .pet-body { padding: 14px; display: grid; gap: 8px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: color-mix(in oklab, var(--text) 10%, transparent); color: var(--text); font-weight: 600; font-size: 12px; }
+
+    /* Forms */
+    form { display: grid; gap: 12px; }
+    .field { display: grid; gap: 8px; }
+    label { font-weight: 700; font-size: 14px; }
+    input, select, textarea { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid color-mix(in oklab, var(--text) 12%, transparent); background: var(--panel-2); color: var(--text); outline: none; }
+    input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 4px var(--ring); border-color: var(--accent); }
+    .inline { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid color-mix(in oklab, var(--text) 10%, transparent); }
+    th { color: var(--muted); font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: .7px; }
+
+    /* Utilities */
+    .flex { display: flex; }
+    .center { display: grid; place-items: center; }
+    .right { margin-left: auto; }
+    .muted { color: var(--muted); }
+
+    /* Modal */
+    dialog { border: none; border-radius: 16px; background: var(--panel); color: var(--text); width: min(720px, 92vw); box-shadow: var(--shadow); }
+    dialog::backdrop { background: rgba(3,10,23,.6); backdrop-filter: blur(4px); }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 18px; right: 18px; background: var(--panel); border: 1px solid color-mix(in oklab, var(--text) 10%, transparent); padding: 12px 14px; border-radius: 12px; display: none; box-shadow: var(--shadow); }
+
+    /* Footer */
+    footer { padding: 30px 0 60px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>StrayCare <span style="color:var(--accent)">India</span></div>
+      </div>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#about">About</a>
+        <a href="#stats">Stats</a>
+        <a href="#adopt">Adopt</a>
+        <a href="#report">Report</a>
+        <a href="#donate">Donate</a>
+        <a href="#volunteer">Volunteer</a>
+        <a href="#map">Map</a>
+      </nav>
+      <div class="actions">
+        <button class="btn secondary" id="themeToggle" aria-label="Toggle theme">Toggle Theme</button>
+        <a class="btn" href="#donate">Donate</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="card pad-lg">
+          <h1 class="title">Rescue • Rehabilitate • Rehome</h1>
+          <p class="subtitle">StrayCare India connects rescuers, feeders, vets, and adopters across the country to give stray dogs a second chance. Track rescues, browse adoptions, and report dogs needing help — all in one dashboard.</p>
+          <div class="flex" style="gap:10px; flex-wrap: wrap;">
+            <a class="btn" href="#adopt">Find a Friend</a>
+            <a class="btn secondary" href="#report">Report a Dog</a>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="num" id="kpiRescued">0</div><div class="label">Dogs Rescued (2025)</div></div>
+            <div class="kpi"><div class="num" id="kpiAdopted">0</div><div class="label">Adoptions Completed</div></div>
+            <div class="kpi"><div class="num" id="kpiActiveCases">0</div><div class="label">Active Cases</div></div>
+            <div class="kpi"><div class="num" id="kpiVolunteers">0</div><div class="label">Active Volunteers</div></div>
+          </div>
+        </div>
+        <div class="hero-art card center">
+          <div class="paws"></div>
+          <div class="doggo">
+            <span class="badge">100% Non‑profit</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section id="stats">
+      <h2 class="section-title">Rescue Stats</h2>
+      <div class="card pad-lg">
+        <canvas id="statsChart" height="220" aria-label="Monthly rescues bar chart" role="img"></canvas>
+        <p class="muted" style="margin-top:8px">Data is illustrative. Hook your backend/API to populate real numbers.</p>
+      </div>
+    </section>
+
+    <!-- Adopt -->
+    <section id="adopt">
+      <div class="flex" style="align-items: end; gap: 12px; justify-content: space-between; flex-wrap: wrap;">
+        <h2 class="section-title">Dogs up for Adoption</h2>
+        <div class="right flex" style="gap:8px; flex-wrap: wrap;">
+          <input id="searchDogs" placeholder="Search by name, city, size…" aria-label="Search dogs" />
+          <select id="filterCity" aria-label="Filter by city"><option value="">All Cities</option></select>
+          <select id="filterSize" aria-label="Filter by size">
+            <option value="">Any Size</option>
+            <option>Puppy</option>
+            <option>Small</option>
+            <option>Medium</option>
+            <option>Large</option>
+          </select>
+        </div>
+      </div>
+      <div id="adoptionGrid" class="grid cols-3" style="margin-top:14px"></div>
+    </section>
+
+    <!-- Report a Dog -->
+    <section id="report">
+      <h2 class="section-title">Report a Dog in Need</h2>
+      <div class="card pad-lg">
+        <form id="reportForm" novalidate>
+          <div class="inline">
+            <div class="field">
+              <label for="reporter">Your Name</label>
+              <input id="reporter" name="reporter" placeholder="Full name" required />
+            </div>
+            <div class="field">
+              <label for="phone">Phone (WhatsApp preferred)</label>
+              <input id="phone" name="phone" type="tel" placeholder="10-digit mobile" pattern="^[0-9]{10}$" required />
+            </div>
+          </div>
+          <div class="inline">
+            <div class="field">
+              <label for="city">City</label>
+              <input id="city" name="city" placeholder="e.g., Hyderabad" required />
+            </div>
+            <div class="field">
+              <label for="pincode">Pincode</label>
+              <input id="pincode" name="pincode" placeholder="6-digit" pattern="^[0-9]{6}$" required />
+            </div>
+          </div>
+          <div class="field">
+            <label for="desc">Describe the situation</label>
+            <textarea id="desc" name="desc" rows="4" placeholder="Injury, location landmarks, temperament, accessibility…" required></textarea>
+          </div>
+          <div class="inline">
+            <div class="field">
+              <label for="urgency">Urgency</label>
+              <select id="urgency" name="urgency" required>
+                <option value="">Select…</option>
+                <option>Emergency</option>
+                <option>High</option>
+                <option>Normal</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="photoUrl">Photo URL (optional)</label>
+              <input id="photoUrl" name="photoUrl" type="url" placeholder="https://…" />
+            </div>
+          </div>
+          <div class="flex" style="gap:10px; align-items:center;">
+            <button class="btn" type="submit">Submit Report</button>
+            <span class="muted">We will route your case to nearby rescuers & vets.</span>
+          </div>
+        </form>
+      </div>
+
+      <details style="margin-top:14px">
+        <summary><strong>Local case queue (demo)</strong></summary>
+        <div class="card pad-lg" style="margin-top:12px; overflow:auto">
+          <table id="caseTable" aria-label="Submitted cases">
+            <thead><tr><th>Time</th><th>Reporter</th><th>Phone</th><th>City</th><th>Pincode</th><th>Urgency</th><th>Description</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- Donate -->
+    <section id="donate">
+      <h2 class="section-title">Donate</h2>
+      <div class="grid cols-2">
+        <div class="card pad-lg">
+          <h3 style="margin:0 0 8px">Support our Work</h3>
+          <p class="muted">Your contribution funds vaccinations, sterilisation (ABC), foster care, and medical emergencies. Even ₹100 makes a difference.</p>
+          <ul>
+            <li>UPI: <strong>straycare@upi</strong></li>
+            <li>Bank: <strong>StrayCare India Trust</strong></li>
+            <li>IFSC: <strong>HDFC000000</strong> • A/C: <strong>1234567890</strong></li>
+          </ul>
+          <button class="btn" id="copyUpi">Copy UPI ID</button>
+        </div>
+        <div class="card pad-lg center" aria-label="QR placeholder for UPI">
+          <img alt="Donate QR placeholder" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=straycare@upi" width="220" height="220" style="border-radius:12px; border:1px solid color-mix(in oklab, var(--text) 12%, transparent)"/>
+          <p class="muted">Scan to donate via UPI</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Volunteer -->
+    <section id="volunteer">
+      <h2 class="section-title">Volunteer with Us</h2>
+      <div class="card pad-lg">
+        <form id="volForm" novalidate>
+          <div class="inline">
+            <div class="field">
+              <label for="vname">Full Name</label>
+              <input id="vname" required placeholder="Your name" />
+            </div>
+            <div class="field">
+              <label for="vphone">Phone</label>
+              <input id="vphone" type="tel" required placeholder="10-digit" pattern="^[0-9]{10}$" />
+            </div>
+          </div>
+          <div class="inline">
+            <div class="field">
+              <label for="vcity">City</label>
+              <input id="vcity" required placeholder="e.g., Pune" />
+            </div>
+            <div class="field">
+              <label for="vskills">Skills</label>
+              <select id="vskills" required>
+                <option value="">Select…</option>
+                <option>Rescue & Transport</option>
+                <option>Foster</option>
+                <option>Vet/Nurse</option>
+                <option>Social Media</option>
+                <option>Fundraising</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn" type="submit">Join the Network</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Map -->
+    <section id="map">
+      <h2 class="section-title">Impact Map (Sample)</h2>
+      <div class="card" style="overflow:hidden">
+        <iframe title="OpenStreetMap India" src="https://www.openstreetmap.org/export/embed.html?bbox=67.0%2C6.0%2C97.5%2C37.5&layer=mapnik" width="100%" height="360" style="border:0"></iframe>
+      </div>
+      <p class="muted" style="margin-top:8px">Replace with a dynamic map (Leaflet/MapLibre) and plot case markers from your backend.</p>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery">
+      <h2 class="section-title">Happy Tails</h2>
+      <div class="grid cols-3">
+        <div class="pet-card"><img src="https://images.unsplash.com/photo-1573821663912-8d7f3f35e913?q=80&w=1200&auto=format&fit=crop" alt="Rescued dog playing"/><div class="pet-body"><span class="chip">Adopted</span><strong>Mowgli • Mumbai</strong><span class="muted">Found injured, now thriving with his family.</span></div></div>
+        <div class="pet-card"><img src="https://images.unsplash.com/photo-1534361960057-19889db9621e?q=80&w=1200&auto=format&fit=crop" alt="Puppy smiling"/><div class="pet-body"><span class="chip">Adopted</span><strong>Chutki • Pune</strong><span class="muted">Parvo survivor turned cuddle bug.</span></div></div>
+        <div class="pet-card"><img src="https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?q=80&w=1200&auto=format&fit=crop" alt="Happy dog running"/><div class="pet-body"><span class="chip">Adopted</span><strong>Raja • Hyderabad</strong><span class="muted">Rescued from highway, now a marathon buddy.</span></div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container">
+    <div class="flex" style="gap: 14px; align-items:center; flex-wrap: wrap;">
+      <span>&copy; <span id="year"></span> StrayCare India Trust</span>
+      <span class="muted">•</span>
+      <a href="#" aria-label="Email">contact@straycare.in</a>
+      <span class="muted">•</span>
+      <a href="#" aria-label="Instagram">Instagram</a>
+      <a href="#" aria-label="Twitter">Twitter/X</a>
+      <a href="#" aria-label="Facebook">Facebook</a>
+      <span class="right muted">Made with ❤️ for Indian strays</span>
+    </div>
+  </footer>
+
+  <!-- Modal for dog details -->
+  <dialog id="dogModal">
+    <div class="pad-lg">
+      <div class="flex" style="justify-content: space-between; align-items:center; gap: 12px;">
+        <h3 id="modalTitle" style="margin:0">Dog Details</h3>
+        <button class="btn secondary" id="closeModal" aria-label="Close">Close</button>
+      </div>
+      <div class="grid cols-2" style="margin-top:12px">
+        <img id="modalImg" alt="Dog photo" style="width:100%; border-radius:12px; border: 1px solid color-mix(in oklab, var(--text) 12%, transparent)" />
+        <div>
+          <p id="modalMeta" class="muted" style="margin-top:0"></p>
+          <p id="modalDesc"></p>
+          <div class="flex" style="gap:8px; flex-wrap: wrap;">
+            <span class="chip" id="modalSize"></span>
+            <span class="chip" id="modalGender"></span>
+            <span class="chip" id="modalVaccinated"></span>
+            <span class="chip" id="modalSterilized"></span>
+          </div>
+          <div class="flex" style="gap:10px; margin-top:12px; flex-wrap:wrap;">
+            <a class="btn" id="adoptCta" href="#volunteer">I'm Interested</a>
+            <a class="btn secondary" href="#donate">Sponsor Care</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // ======= Demo Data =======
+    const dogs = [
+      { id: 1, name: 'Sheru', city: 'Hyderabad', size: 'Medium', gender: 'Male', vaccinated: true, sterilized: true, age: '2y', photo: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1200&auto=format&fit=crop', about: 'Gentle street boy rescued after a paw injury. Great with kids and other dogs.' },
+      { id: 2, name: 'Lassi', city: 'Delhi', size: 'Small', gender: 'Female', vaccinated: true, sterilized: false, age: '8m', photo: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1200&auto=format&fit=crop', about: 'Sweet, slightly shy, loves belly rubs. Ideal for apartments.' },
+      { id: 3, name: 'Bheem', city: 'Pune', size: 'Large', gender: 'Male', vaccinated: false, sterilized: false, age: '3y', photo: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=1200&auto=format&fit=crop', about: 'Majestic indie, protective and loyal. Needs experienced handler.' },
+      { id: 4, name: 'Mithu', city: 'Mumbai', size: 'Puppy', gender: 'Female', vaccinated: true, sterilized: false, age: '4m', photo: 'https://images.unsplash.com/photo-1543466835-7a15c1df9d83?q=80&w=1200&auto=format&fit=crop', about: 'Playful puppy, fostered with cats. Learning basic commands.' },
+      { id: 5, name: 'Sultan', city: 'Bengaluru', size: 'Medium', gender: 'Male', vaccinated: true, sterilized: true, age: '1.5y', photo: 'https://images.unsplash.com/photo-1545486332-9e0999c535b7?q=80&w=1200&auto=format&fit=crop', about: 'Energetic and smart. Loves long walks and snuffle mats.' },
+      { id: 6, name: 'Guriya', city: 'Chennai', size: 'Small', gender: 'Female', vaccinated: false, sterilized: false, age: '10m', photo: 'https://images.unsplash.com/photo-1548191265-cc70d3d45ba1?q=80&w=1200&auto=format&fit=crop', about: 'Calm, cuddly, ideal for first-time adopters. House-trained.' },
+    ];
+
+    const kpis = {
+      rescued: 312,
+      adopted: 204,
+      activeCases: 18,
+      volunteers: 457
+    };
+
+    // ======= Helpers =======
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const toast = (msg) => {
+      const t = $('#toast');
+      t.textContent = msg; t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 2400);
+    };
+
+    const updateKPIs = () => {
+      $('#kpiRescued').textContent = kpis.rescued.toLocaleString('en-IN');
+      $('#kpiAdopted').textContent = kpis.adopted.toLocaleString('en-IN');
+      $('#kpiActiveCases').textContent = kpis.activeCases.toLocaleString('en-IN');
+      $('#kpiVolunteers').textContent = kpis.volunteers.toLocaleString('en-IN');
+    };
+
+    const populateFilters = () => {
+      const cities = Array.from(new Set(dogs.map(d => d.city))).sort();
+      const citySel = $('#filterCity');
+      cities.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; citySel.appendChild(o); });
+    };
+
+    const renderDogs = (list = dogs) => {
+      const grid = $('#adoptionGrid');
+      grid.innerHTML = '';
+      list.forEach(d => {
+        const card = document.createElement('div');
+        card.className = 'pet-card';
+        card.innerHTML = `
+          <img src="${d.photo}" alt="${d.name} the dog in ${d.city}" loading="lazy"/>
+          <div class="pet-body">
+            <div class="flex" style="justify-content: space-between; align-items:center;">
+              <strong>${d.name} • ${d.city}</strong>
+              <button class="btn secondary" data-id="${d.id}">Details</button>
+            </div>
+            <div class="flex" style="gap:6px; flex-wrap: wrap;">
+              <span class="chip">${d.size}</span>
+              <span class="chip">${d.gender}</span>
+              <span class="chip">${d.vaccinated ? 'Vaccinated' : 'Not Vaccinated'}</span>
+            </div>
+            <span class="muted">${d.about}</span>
+          </div>`;
+        grid.appendChild(card);
+      });
+    };
+
+    const attachDogHandlers = () => {
+      $('#adoptionGrid').addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-id]');
+        if(!btn) return;
+        const d = dogs.find(x => x.id === Number(btn.dataset.id));
+        if(!d) return;
+        $('#modalTitle').textContent = `${d.name} • ${d.city}`;
+        $('#modalImg').src = d.photo;
+        $('#modalDesc').textContent = d.about;
+        $('#modalMeta').textContent = `${d.age} • ${d.gender}`;
+        $('#modalSize').textContent = d.size;
+        $('#modalGender').textContent = d.gender;
+        $('#modalVaccinated').textContent = d.vaccinated ? 'Vaccinated' : 'Not Vaccinated';
+        $('#modalSterilized').textContent = d.sterilized ? 'Sterilized' : 'Not Sterilized';
+        $('#dogModal').showModal();
+      });
+      $('#closeModal').addEventListener('click', () => $('#dogModal').close());
+    };
+
+    const applyFilters = () => {
+      const q = $('#searchDogs').value.toLowerCase().trim();
+      const city = $('#filterCity').value;
+      const size = $('#filterSize').value;
+      let list = dogs.filter(d =>
+        (!city || d.city === city) &&
+        (!size || d.size === size) &&
+        (!q || [d.name, d.city, d.size, d.gender, d.about].some(x => x.toLowerCase().includes(q)))
+      );
+      renderDogs(list);
+    };
+
+    // ======= Forms =======
+    const caseStoreKey = 'straycare_cases_v1';
+    const loadCases = () => JSON.parse(localStorage.getItem(caseStoreKey) || '[]');
+    const saveCase = (caseObj) => {
+      const list = loadCases();
+      list.unshift(caseObj);
+      localStorage.setItem(caseStoreKey, JSON.stringify(list));
+      drawCaseTable();
+    };
+
+    const drawCaseTable = () => {
+      const tbody = $('#caseTable tbody');
+      const rows = loadCases().map(c => `
+        <tr>
+          <td>${new Date(c.time).toLocaleString('en-IN')}</td>
+          <td>${c.reporter}</td>
+          <td>${c.phone}</td>
+          <td>${c.city}</td>
+          <td>${c.pincode}</td>
+          <td><span class="chip">${c.urgency}</span></td>
+          <td>${c.desc}</td>
+        </tr>`).join('');
+      tbody.innerHTML = rows || '<tr><td class="muted" colspan="7">No cases yet. Be the first to report.</td></tr>';
+    };
+
+    $('#reportForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const f = e.target;
+      const data = Object.fromEntries(new FormData(f).entries());
+      if(!f.reporter.value || !/^\d{10}$/.test(f.phone.value) || !/^\d{6}$/.test(f.pincode.value) || !f.city.value || !f.desc.value || !f.urgency.value){
+        toast('Please complete all required fields with valid info.');
+        return;
+      }
+      const caseObj = { ...data, time: Date.now() };
+      saveCase(caseObj);
+      f.reset();
+      toast('Report submitted. We will reach out shortly.');
+    });
+
+    $('#volForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const f = e.target;
+      if(!f.vname.value || !/^\d{10}$/.test(f.vphone.value) || !f.vcity.value || !f.vskills.value){
+        toast('Please fill all volunteer fields correctly.');
+        return;
+      }
+      toast('Thank you for joining our volunteer network!');
+      f.reset();
+    });
+
+    $('#copyUpi').addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText('straycare@upi'); toast('UPI ID copied to clipboard'); }
+      catch { toast('Could not copy. Long‑press to copy manually.'); }
+    });
+
+    // ======= Chart (vanilla canvas) =======
+    const drawChart = () => {
+      const el = document.getElementById('statsChart');
+      const ctx = el.getContext('2d');
+      const labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'];
+      const values = [18,22,35,27,44,39,51,76];
+      // Clear
+      ctx.clearRect(0,0,el.width,el.height);
+      const w = el.width, h = el.height, pad = 36;
+      const max = Math.max(...values) * 1.2;
+      // Axes
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pad, pad); ctx.lineTo(pad, h - pad); ctx.lineTo(w - pad, h - pad); ctx.stroke();
+      // Bars
+      const barW = ((w - pad*2) / values.length) * 0.6;
+      values.forEach((v, i) => {
+        const x = pad + i * ((w - pad*2) / values.length) + (((w - pad*2) / values.length) - barW)/2;
+        const y = h - pad - (v / max) * (h - pad*2);
+        const grad = ctx.createLinearGradient(0, y, 0, h - pad);
+        grad.addColorStop(0, 'rgba(56,189,248,0.9)');
+        grad.addColorStop(1, 'rgba(34,197,94,0.9)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, barW, h - pad - y);
+        // Label
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted');
+        ctx.textAlign = 'center'; ctx.font = '12px Inter';
+        ctx.fillText(labels[i], x + barW/2, h - pad + 16);
+      });
+    };
+
+    // ======= Theme =======
+    const appliedTheme = () => localStorage.getItem('straycare_theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    const setTheme = (t) => {
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('straycare_theme', t);
+      drawChart();
+    };
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      setTheme(t);
+    });
+
+    // ======= Filters =======
+    ['input', 'change'].forEach(evt => {
+      $('#searchDogs').addEventListener(evt, applyFilters);
+      $('#filterCity').addEventListener(evt, applyFilters);
+      $('#filterSize').addEventListener(evt, applyFilters);
+    });
+
+    // ======= Init =======
+    const init = () => {
+      document.getElementById('year').textContent = new Date().getFullYear();
+      setTheme(appliedTheme());
+      updateKPIs();
+      populateFilters();
+      renderDogs(dogs);
+      attachDogHandlers();
+      drawChart();
+      drawCaseTable();
+    };
+
+    window.addEventListener('resize', () => drawChart());
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
